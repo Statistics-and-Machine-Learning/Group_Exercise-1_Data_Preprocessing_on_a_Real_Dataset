@@ -18,38 +18,56 @@ The dataset includes product-level and outlet-level information such as:
 * Outlet location type
 * Outlet establishment year
 
-The target variable (if used later) is typically **Item_Outlet_Sales**.
+The target variable is typically **Item_Outlet_Sales**.
 
 ## Preprocessing Steps
 
 The notebook covers the following steps:
 
-1. **Data Loading and Inspection**
+ 1. Handling Missing Values 
+Identified via df.isnull().sum(): ItemWeight (976 missing), OutletSize (1606 missing).
 
-   * Reading the dataset
-   * Shape, data types, and summary statistics
+Imputed ItemWeight with mean (df['Item_Weight'].fillna(df['Item_Weight'].mean(), inplace=True)), OutletSize with mode (df['Outlet_Size'].fillna(df['Outlet_Size'].mode()[0], inplace=True)).
 
-2. **Missing Value Handling**
+Verified: 0 missing values post-imputation.
+​
 
-   * Imputation of numerical features (mean/median)
-   * Logical handling of categorical missing values
+2️. Scaling Numerical Features 
+Z-Score Standardization: Applied StandardScaler() to ItemWeight, ItemVisibility, ItemMRP, OutletEstablishmentYear → mean=0, std=1, unbounded range.
 
-3. **Data Cleaning**
+Min-Max Normalization: Applied MinMaxScaler() to same columns → scaled to range.
+​
 
-   * Fixing inconsistent category labels
-   * Handling zero or invalid values where applicable
+Difference: Z-score centers data (unbounded); Min-Max bounds to fixed interval. Outputs: df_zscore, df_minmax.
+​
 
-4. **Feature Encoding**
+3️ . Handling Noise 
+Selected ItemMRP as numerical feature.
 
-   * Label encoding / one-hot encoding for categorical variables
+Injected artificial Gaussian noise: np.random.normal(0, scale=df['Item_MRP'].std()*0.2, size=len(df)) (seed=42).
 
-5. **Feature Scaling**
+Applied rolling mean smoothing: df['Item_MRP_smoothed'] = df['Item_MRP_noisy'].rolling(window=10, min_periods=1).mean().
 
-   * Z-score standardization of numerical features
+Visualized before/after with plot.
+​
 
-6. **Final Dataset Preparation**
+4️ .Handling Outliers
+Detection: Z-score (>3 threshold) on numerical columns: ItemVisibility (81 outliers), ItemMRP_smoothed (14 outliers).
 
-   * Cleaned and transformed dataset ready for modeling
+Handling: Log1p transformation (np.log1p()) on numerical columns with values >0 to compress extremes without removal.
+
+Justification: Preserves data (no removal), suitable for skewed retail data like sales/MRP; avoids losing genuine high-value transactions. Compared original vs. transformed DataFrames.
+​
+
+5️ .Feature Selection 
+Method: Filter (correlation matrix on numerical columns: ItemWeight, ItemVisibility, ItemMRP, OutletEstablishmentYear).
+
+Correlation threshold: >0.8 for removal (none found; max ~0.1).
+
+Retained all features; saved as df_selected.
+
+Justification: Reduces multicollinearity efficiently without target variable; simple & fast for preprocessing. Final output: BigMart_preprocessed_final.csv 
+
 
 ## Technologies Used
 
@@ -71,12 +89,12 @@ The notebook covers the following steps:
 1. Clone the repository:
 
    ```bash
-   git clone <repository-url>
+   git clone <https://github.com/Statistics-and-Machine-Learning/Group_Exercise-1_Data_Preprocessing_on_a_Real_Dataset>
    ```
 2. Navigate to the project directory:
 
    ```bash
-   cd <repository-name>
+   cd <Group_Exercise-1_Data_Preprocessing_on_a_Real_Dataset>
    ```
 3. Open the notebook:
 
