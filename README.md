@@ -97,9 +97,13 @@ The final output is a clean, standardized dataset suitable for:
 ## Collaborators
 
 Saniya Shaikh
+
 Shruti Bhandari
+
 Hadassah Mercy
+
 Sakshi Manjrekar
+
 ## License
 
 This project is for academic and learning purposes.
